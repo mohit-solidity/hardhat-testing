@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { parseEther } from "ethers";
 import { network } from "hardhat";
 
 const { ethers } = await network.create();
@@ -41,4 +42,13 @@ describe("TimeStaking", function () {
       "APY Limit Exceeded",
     );
   });
+  it("Should Revert With 0 Value"),
+    async function () {
+      await expect(
+        contract.stake(30, { value: parseEther("0") }),
+      ).to.be.revertedWith("Error");
+    };
+  it("Should Not Let Withdraw Without Active Stake"),async function(){
+    await expect(contract.unstake()).to.be.revertedWith("No Active Stake");
+  }
 });
