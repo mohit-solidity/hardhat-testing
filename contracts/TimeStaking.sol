@@ -51,6 +51,9 @@ contract TimeStaking{
         userStatus[msg.sender] = user(msg.value,block.timestamp,timeStake,true);
         emit UserStaked(msg.sender, msg.value, time);
     }
+    function currentTime() public view returns(uint){
+        return (block.timestamp);
+    }
     function calculateReward(address _user) internal view returns(uint){
         uint totalTime = block.timestamp - userStatus[_user].startTime;
         uint timeInDays = totalTime/1 days;
