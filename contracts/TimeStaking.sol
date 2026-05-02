@@ -12,7 +12,7 @@ contract TimeStaking{
         uint stakedTime;
         bool staked;
     }
-    mapping(address=>user) userStatus;
+    mapping(address=>user) public userStatus;
 
     event UserStaked(address user,uint amount, uint timeInDays);
     event AmountWithdraw(address user, uint amount,uint reward,uint totalAmount);

@@ -42,13 +42,20 @@ describe("TimeStaking", function () {
       "APY Limit Exceeded",
     );
   });
-  it("Should Revert With 0 Value"),
+  it("Should Let User Stake With 20 Days And 4 ETH",
+    async function () {
+      await expect(contract.connect(otherUser).stake(20, { value: parseEther("4") })).to.emit(contract,"UserStaked");
+      const userStatus = await contract.userStatus(otherUser);
+      console.log(`User Status  : ${userStatus}`)
+  });
+  it("Should Not Let Withdraw Without Active Stake",
+    async function () {
+      await expect(contract.connect(otherUser).unstake()).to.be.revertedWith("No Active Stake");
+    });
+  it("Should Revert With 0 Value",
     async function () {
       await expect(
-        contract.stake(30, { value: parseEther("0") }),
-      ).to.be.revertedWith("Error");
-    };
-  it("Should Not Let Withdraw Without Active Stake"),async function(){
-    await expect(contract.unstake()).to.be.revertedWith("No Active Stake");
-  }
+        contract.connect(otherUser).stake(30, { value: parseEther("0") }),
+      ).to.be.revertedWithCustomError(contract,"InvalidAmount");
+    });
 });
