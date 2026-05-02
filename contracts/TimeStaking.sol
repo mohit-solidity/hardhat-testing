@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 contract TimeStaking{
-    uint8 APY;
+    uint8 public APY;
     bool locked;
     uint totalLiquidity;
     address public owner;
@@ -37,7 +37,7 @@ contract TimeStaking{
         locked = false;
     }
     function changeAPY(uint8 _APY) public onlyOwner{
-        require(_APY>0 && _APY<=30,"APY Limit Excedded");
+        require(_APY>0 && _APY<=30,"APY Limit Exceeded");
         APY = _APY;
     }
     function stake(uint time) public payable{
