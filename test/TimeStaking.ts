@@ -47,8 +47,17 @@ describe("TimeStaking", function () {
     await expect(
       contract.connect(otherUser).stake(20, { value: parseEther("4") }),
     ).to.emit(contract, "UserStaked");
-    const userStatus = await contract.userStatus(otherUser);
+    const userStatus = await contract.userStatus(otherUser.address);
     console.log(`User Status  : ${userStatus}`);
+  });
+  it("Should Not Let User Stake Again When It Already Staked",async function(){
+    contract.connect(otherUser).stake(20, { value: parseEther("4") });
+    await expect(contract.connect(otherUser).stake(20, { value: parseEther("4") })).to.be.revertedWithCustomError(contract,"alreadyStaked");
+  })
+  it("Should Revert With 0 Value", async function () {
+    await expect(
+      contract.connect(otherUser).stake(30, { value: parseEther("0") }),
+    ).to.be.revertedWithCustomError(contract, "InvalidAmount");
   });
   it("Should Not Let Withdraw Without Active Stake", async function () {
     const userStatus = await contract.userStatus(otherUser);
@@ -57,18 +66,20 @@ describe("TimeStaking", function () {
       "No Active Stake",
     );
   });
-  it("Should Revert With 0 Value", async function () {
-    await expect(
-      contract.connect(otherUser).stake(30, { value: parseEther("0") }),
-    ).to.be.revertedWithCustomError(contract, "InvalidAmount");
-  });
-  it("Should Not Let Withdraw User Before Staking Time", async function () {
+  it("Should Not Let Withdraw User Before Staking Time Completed", async function () {
     await contract.connect(otherUser).stake(30, { value: parseEther("30") });
     await expect(contract.connect(otherUser).unstake()).to.be.revertedWith(
       "Funds Still Locked",
     );
   });
+  it("Should Not Withdraw From Contract IF The Contract Has Not Enough Liquidity",async function(){
+    await contract.connect(otherUser).stake(20,{value:parseEther("20")});
+    await ethers.provider.send("evm_increaseTime",[20*86400]);
+    await ethers.provider.send("evm_mine",[]);
+    await expect(contract.connect(otherUser).unstake()).to.be.revertedWith("Transaction Failed");
+  })
   it("Should Let User Withdraw After Time Expiry", async function () {
+    await contract.stake(20,{value:parseEther("30")});
     await contract.connect(otherUser).stake(30, { value: parseEther("30") });
     let currentTime = await contract.currentTime()
     console.log(`Current Time Before Increasing Time : ${currentTime}`)
