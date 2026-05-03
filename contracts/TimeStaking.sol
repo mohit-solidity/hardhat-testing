@@ -54,7 +54,7 @@ contract TimeStaking{
     function currentTime() public view returns(uint){
         return (block.timestamp);
     }
-    function calculateReward(address _user) internal view returns(uint){
+    function calculateReward(address _user) public view returns(uint){
         uint totalTime = block.timestamp - userStatus[_user].startTime;
         uint timeInDays = totalTime/1 days;
         uint userBalance = userStatus[_user].balance;
@@ -67,7 +67,7 @@ contract TimeStaking{
         uint reward = calculateReward(msg.sender);
         uint balance = userStatus[msg.sender].balance;
         uint totalReward = balance+reward;
-        (bool success, ) = payable(msg.sender).call{value:balance}("");
+        (bool success, ) = payable(msg.sender).call{value:totalReward}("");
         require(success,"Transaction Failed");
         userStatus[msg.sender].balance = 0;
         userStatus[msg.sender].startTime = 0;

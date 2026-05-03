@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { parseEther } from "ethers";
+import { formatEther, parseEther } from "ethers";
 import { network } from "hardhat";
 
 const { ethers } = await network.create();
@@ -8,10 +8,12 @@ describe("TimeStaking", function () {
   let owner;
   let otherUser: any;
   let contract: any;
+  let anotherUser : any;
   before(async function () {
-    [owner, otherUser] = await ethers.getSigners();
+    [owner, otherUser,anotherUser] = await ethers.getSigners();
     contract = await ethers.deployContract("TimeStaking", [30]);
     await contract.connect(otherUser).stake(20, { value: parseEther("30") });
+    await contract.stake(20, { value: parseEther("40") });
   });
   it("Should Not Let User Stake Again", async function () {
     const user = await contract
@@ -29,9 +31,12 @@ describe("TimeStaking", function () {
     await ethers.provider.send("evm_mine", []);
     time = await contract.currentTime();
     console.log(`Current Time : ${time}`);
-    await expect(contract.connect(otherUser).unstake()).to.be.emit(
-      contract,
-      "AmountWithdraw",
-    );
+    const reward = await contract.seeUserReward(otherUser.address);
+    const totalReward = reward[0] + reward[3];
+    console.log(`total reward in Time : ${totalReward}`);
+    console.log(`Reward : ${reward}`);
+    await expect(contract.connect(otherUser).unstake())
+      .to.be.emit(contract, "AmountWithdraw")
+      .withArgs(otherUser.address, parseEther("30"), reward[3], totalReward);
   });
 });

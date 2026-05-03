@@ -21,7 +21,7 @@ describe("TimeStaking", function () {
   it("Should Run Correctly", async function () {
     await contract.ownerWithdraw();
   });
-  it.only("Should Not Let Any Other User TO Change The APY", async function () {
+  it("Should Not Let Any Other User TO Change The APY", async function () {
     const u = contract.connect(otherUser);
     await expect(u.changeAPY(20)).to.be.revertedWith("Not Authorised");
   });
