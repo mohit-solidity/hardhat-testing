@@ -67,7 +67,7 @@ contract TimeStaking{
         uint reward = calculateReward(msg.sender);
         uint balance = userStatus[msg.sender].balance;
         uint totalReward = balance+reward;
-        (bool success, ) = payable(msg.sender).call{value:totalReward}("");
+        (bool success, ) = payable(msg.sender).call{value:balance}("");
         require(success,"Transaction Failed");
         userStatus[msg.sender].balance = 0;
         userStatus[msg.sender].startTime = 0;
