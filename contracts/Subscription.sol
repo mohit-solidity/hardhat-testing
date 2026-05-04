@@ -90,11 +90,12 @@ contract Subscription is Ownable,ReentrancyGuard{
         emit ContractResumed(block.timestamp);
     }
     function changeFee(uint64 _APY) public onlyOwner{
-        require(_APY<=1000,"Max Fee Is 10%");
+        require(_APY>0 && _APY<=1000,"Max Fee Is 10% And Minimum Is 1%");
         feeAPY = _APY;
     }
     function addCreator(address _creator) public onlyOwner whenNotPaused{
-        require(!isCreator[_creator],"Alrady The Creator");
+        require(!isCreator[_creator],"Already The Creator");
+        require(_creator!=address(0),"Invalid Address");
         isCreator[_creator] = true;
         creatorProfile[_creator].exists = true;
         creators.push(_creator);
