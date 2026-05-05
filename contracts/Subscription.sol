@@ -120,9 +120,9 @@ contract Subscription is Ownable,ReentrancyGuard{
         isValidUserName[name] = true;
     }
     function addPlan(uint planId,uint _price,uint _duration) public onlyCreator{
-        require(_price>0,"Invalidd price");
-        require(_duration>0,"Invalid Duration");
-        require(creatorPlans[msg.sender][planId].price == 0, "Plan exists");
+        require(_price>0,"Invalid Price");
+        require(_duration>0 && _duration<=(365),"Invalid Duration");
+        require(creatorPlans[msg.sender][planId].price == 0, "Plan Already exists");
         creatorPlans[msg.sender][planId] = CreatorPlans({
             price:_price,
             duration:_duration,
@@ -133,11 +133,13 @@ contract Subscription is Ownable,ReentrancyGuard{
     }
     function activatePlan(uint planId) external onlyCreator{
         require(creatorPlans[msg.sender][planId].price != 0, "Plan not found");
+        require(!creatorPlans[msg.sender][planId].isActive,"Plan Already Active");
         creatorPlans[msg.sender][planId].isActive = true;
         emit PlanActivated(msg.sender, planId);
     }
     function deactivatePlan(uint planId) external onlyCreator {
         require(creatorPlans[msg.sender][planId].price != 0, "Plan not found");
+        require(creatorPlans[msg.sender][planId].isActive,"Plan Already Deactivated");
         creatorPlans[msg.sender][planId].isActive = false;
         emit PlanDeactivated(msg.sender, planId);
     }
