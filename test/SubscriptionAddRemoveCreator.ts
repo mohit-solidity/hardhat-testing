@@ -14,10 +14,9 @@ describe("Add/Remove creators", function () {
   });
   describe("Owner Functions", function () {
     it("Owner Can Add New User Creator", async function () {
-      await expect(contract.addCreator(thirdUser.address)).to.emit(
-        contract,
-        "CreatorAdded",
-      ).withArgs(thirdUser.address);
+      await expect(contract.addCreator(thirdUser.address))
+        .to.emit(contract, "CreatorAdded")
+        .withArgs(thirdUser.address);
       const isCreator = await contract.isCreator(thirdUser.address);
       expect(isCreator).to.equal(true);
     });
@@ -28,10 +27,9 @@ describe("Add/Remove creators", function () {
     });
     it("Should Let Owner Only To Remove The Creator", async function () {
       //Owner Removed The Creator
-      await expect(contract.removeCreator(owner.address)).to.emit(
-        contract,
-        "CreatorRemoved",
-      ).withArgs(owner.address);
+      await expect(contract.removeCreator(owner.address))
+        .to.emit(contract, "CreatorRemoved")
+        .withArgs(owner.address);
       const isCreator = await contract.isCreator(owner.address);
       expect(isCreator).to.equal(false);
     });

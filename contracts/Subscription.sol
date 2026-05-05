@@ -109,8 +109,9 @@ contract Subscription is Ownable,ReentrancyGuard{
         creatorProfile[_creator].exists = false;
         emit CreatorRemoved(_creator);
     }
-    function setCreatorData(string memory name) public onlyCreator whenNotPaused{
+    function setCreatorName(string memory name) public onlyCreator whenNotPaused{
         Creator storage c = creatorProfile[msg.sender];
+        require(bytes(name).length>0,"UserName Length Can't Be Null");
         if (bytes(c.name).length != 0) {
             isValidUserName[c.name] = false;
         }
