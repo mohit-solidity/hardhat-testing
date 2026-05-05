@@ -76,7 +76,7 @@ describe("Creator Profile Setup", function () {
     });
   })
   describe("Plan Activate/Deactivate Edge Cases",function(){
-    it.only("Should Let Owner Deactivate A Plan",async function(){
+    it("Should Let Owner Deactivate A Plan",async function(){
         await contract.addCreator(otherUser.address);
         const otheruser = await contract.connect(otherUser);
         await expect(otheruser.addPlan(1,parseEther("20"),30)).to.emit(contract,"PlanAdded").withArgs(otherUser.address,1);
@@ -84,7 +84,7 @@ describe("Creator Profile Setup", function () {
         await expect(otheruser.deactivatePlan(1)).to.be.revertedWith("Plan Already Deactivated");
         await expect(otheruser.deactivatePlan(20)).to.be.revertedWith("Plan not found");
     });
-    it.only("Should Let Owner Activate Plan Again",async function(){
+    it("Should Let Owner Activate Plan Again",async function(){
         await contract.addCreator(otherUser.address);
         const otheruser = await contract.connect(otherUser);
         await expect(otheruser.addPlan(1,parseEther("20"),30)).to.emit(contract,"PlanAdded").withArgs(otherUser.address,1);
@@ -94,5 +94,12 @@ describe("Creator Profile Setup", function () {
         await expect(otheruser.activatePlan(10)).to.be.revertedWith("Plan not found");
     })
   })
-  describe("Not Creator", function () {});
+  describe("Not Creator", function () {
+    it.only("Should Not Let Non-Creator Interact With Any Functions That Are Only For Creators",async function(){
+        await expect(contract.connect(otherUser).setCreatorName("Pirate")).to.be.revertedWith("Not a creator");
+        await expect(contract.connect(otherUser).addPlan(1,parseEther("30"),30)).to.be.revertedWith("Not a creator");
+        await expect(contract.connect(otherUser).activatePlan(20)).to.be.revertedWith("Not a creator");
+        await expect(contract.connect(otherUser).deactivatePlan(20)).to.be.revertedWith("Not a creator");        
+    })
+  });
 });
