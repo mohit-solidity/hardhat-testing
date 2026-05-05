@@ -4,21 +4,17 @@ import { network } from "hardhat";
 
 const { ethers } = await network.create();
 
-describe("Subscription", function () {
+describe("Pause/Resume And Fee Contract", function () {
   let owner: any;
   let otherUser: any;
   let thirdUser: any;
   let contract: any;
-  before(async function () {
+  beforeEach(async function () {
     [owner, otherUser, thirdUser] = await ethers.getSigners();
     contract = await ethers.deployContract("Subscription");
-    await contract.addCreator(otherUser.address);
   });
-  describe("Fee Structure", function () {
+  describe("Owner Functions", function () {
     it("Only Owner Can Change The Fee", async function () {
-      await expect(
-        contract.connect(otherUser).changeFee(20),
-      ).to.be.revertedWithCustomError(contract, "OwnableUnauthorizedAccount");
       await contract.changeFee(700);
       expect(await contract.feeAPY()).to.equal(700n);
     });

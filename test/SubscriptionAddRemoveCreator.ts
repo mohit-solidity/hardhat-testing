@@ -8,7 +8,7 @@ describe("Add/Remove creators", function () {
   let owner: any;
   let otherUser: any;
   let thirdUser: any;
-  before(async function () {
+  beforeEach(async function () {
     [owner, otherUser, thirdUser] = await ethers.getSigners();
     contract = await ethers.deployContract("Subscription");
   });
@@ -17,7 +17,7 @@ describe("Add/Remove creators", function () {
       await expect(contract.addCreator(thirdUser.address)).to.emit(
         contract,
         "CreatorAdded",
-      );
+      ).withArgs(thirdUser.address);
       const isCreator = await contract.isCreator(thirdUser.address);
       expect(isCreator).to.equal(true);
     });
@@ -31,7 +31,7 @@ describe("Add/Remove creators", function () {
       await expect(contract.removeCreator(owner.address)).to.emit(
         contract,
         "CreatorRemoved",
-      );
+      ).withArgs(owner.address);
       const isCreator = await contract.isCreator(owner.address);
       expect(isCreator).to.equal(false);
     });
@@ -41,20 +41,28 @@ describe("Add/Remove creators", function () {
       ).to.be.revertedWithCustomError(contract, "NotTheCreator");
     });
     it("Should Not Let Owner To Add Same Creator Again", async function () {
+      await contract.addCreator(thirdUser.address);
       await expect(contract.addCreator(thirdUser.address)).to.be.revertedWith(
         "Already The Creator",
       );
     });
+    it("Should Not Let Owner Add Creator When The Contract Is Paused", async function () {
+      const paused = await contract.pauseContract();
+      await expect(contract.addCreator(owner.address)).to.be.revertedWith(
+        "Contract Is Paused",
+      );
+    });
   });
-  it("Should not let any other user to add any creator", async function () {
-    await expect(
-      contract.connect(otherUser).addCreator(owner.address),
-    ).to.be.revertedWithCustomError(contract, "OwnableUnauthorizedAccount");
-  });
-
-  it("Other Normal User Can't Remove The Creator", async function () {
-    await expect(
-      contract.connect(otherUser).removeCreator(thirdUser.address),
-    ).to.be.revertedWithCustomError(contract, "OwnableUnauthorizedAccount");
+  describe("Normal User Access Owner Controls", function () {
+    it("Should not let any other user to add any creator", async function () {
+      await expect(
+        contract.connect(otherUser).addCreator(owner.address),
+      ).to.be.revertedWithCustomError(contract, "OwnableUnauthorizedAccount");
+    });
+    it("Other Normal User Can't Remove The Creator", async function () {
+      await expect(
+        contract.connect(otherUser).removeCreator(thirdUser.address),
+      ).to.be.revertedWithCustomError(contract, "OwnableUnauthorizedAccount");
+    });
   });
 });
