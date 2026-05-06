@@ -175,16 +175,9 @@ contract Subscription is Ownable,ReentrancyGuard{
         require(c.exists,"Creator Doesn't exists");
         CreatorPlans memory p = creatorPlans[_creator][planId];
         require(subscriptionBoughtDuration[_user][_creator]<block.timestamp,"Subscription Still Active");
-        require(p.isActive, "Plan not active");
-        require(creatorPlans[_creator][planId].price != 0, "Plan not found");
+        require(p.isActive, "Plan Not Active");
         require(msg.value==p.price,"Make sure To Send Same Amount The Creator Set");
-        uint currentExpiry = subscriptionBoughtDuration[_user][_creator];
-        uint expiry;
-        if(currentExpiry>block.timestamp){
-            expiry = currentExpiry + (p.duration*1 days);
-        }else{
-            expiry = (block.timestamp+(p.duration *1 days));
-        }
+        uint expiry = (block.timestamp+(p.duration *1 days));
         if(!hasSubscribedBefore[_user][_creator]){
             c.totalSubscribers ++;
         }
