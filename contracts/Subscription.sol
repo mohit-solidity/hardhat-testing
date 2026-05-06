@@ -152,15 +152,9 @@ contract Subscription is Ownable,ReentrancyGuard{
         Creator storage c = creatorProfile[_creator];
         CreatorPlans memory p = creatorPlans[_creator][planId];
         require(p.isActive, "Plan Not Active or Not Found");
-        require(msg.value==p.price,"Make sure To Send Same Amount Of User");
+        require(msg.value==p.price,"Make sure To Send Same Amount The Creator Set");
         require(subscriptionBoughtDuration[msg.sender][_creator]<block.timestamp,"Subscription Still Active");
-        uint currentExpiry = subscriptionBoughtDuration[msg.sender][_creator];
-        uint expiry;
-        if(currentExpiry>block.timestamp){
-            expiry = currentExpiry + (p.duration*1 days);
-        }else{
-            expiry = (block.timestamp+(p.duration*1 days));
-        }
+        uint expiry = (block.timestamp+(p.duration*1 days));
         if(!hasSubscribedBefore[msg.sender][_creator]){
             c.totalSubscribers ++;
         }
@@ -183,8 +177,7 @@ contract Subscription is Ownable,ReentrancyGuard{
         require(subscriptionBoughtDuration[_user][_creator]<block.timestamp,"Subscription Still Active");
         require(p.isActive, "Plan not active");
         require(creatorPlans[_creator][planId].price != 0, "Plan not found");
-        require(p.duration!=0,"Craetor hasn't Set Their Monthly Pay Yet");
-        require(msg.value==p.price,"Make sure To Send Same Amount Creator Set");
+        require(msg.value==p.price,"Make sure To Send Same Amount The Creator Set");
         uint currentExpiry = subscriptionBoughtDuration[_user][_creator];
         uint expiry;
         if(currentExpiry>block.timestamp){

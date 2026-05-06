@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { parseEther } from "ethers";
+import { formatEther, parseEther } from "ethers";
 import { network } from "hardhat";
 
 const { ethers } = await network.create();
@@ -59,35 +59,35 @@ describe("Buy Sell Subscription Logic", function () {
             .buyOrRenewSubscription(otherUser.address, 1, {
               value: parseEther("2"),
             }),
-        ).to.be.revertedWith("Make sure To Send Same Amount Of User");
+        ).to.be.revertedWith("Make sure To Send Same Amount The Creator Set");
         await expect(
           contract
             .connect(thirdUser)
             .buyOrRenewSubscription(otherUser.address, 1, {
               value: parseEther("19"),
             }),
-        ).to.be.revertedWith("Make sure To Send Same Amount Of User");
+        ).to.be.revertedWith("Make sure To Send Same Amount The Creator Set");
         await expect(
           contract
             .connect(thirdUser)
             .buyOrRenewSubscription(otherUser.address, 1, {
               value: parseEther("21"),
             }),
-        ).to.be.revertedWith("Make sure To Send Same Amount Of User");
+        ).to.be.revertedWith("Make sure To Send Same Amount The Creator Set");
         await expect(
           contract
             .connect(thirdUser)
             .buyOrRenewSubscription(otherUser.address, 1, {
               value: parseEther("19.999999999999999999"),
             }),
-        ).to.be.revertedWith("Make sure To Send Same Amount Of User");
+        ).to.be.revertedWith("Make sure To Send Same Amount The Creator Set");
         await expect(
           contract
             .connect(thirdUser)
             .buyOrRenewSubscription(otherUser.address, 1, {
               value: parseEther("20.000000000000000001"),
             }),
-        ).to.be.revertedWith("Make sure To Send Same Amount Of User");
+        ).to.be.revertedWith("Make sure To Send Same Amount The Creator Set");
       });
       it("Should Not Let User Renew Subscription Again Before Expiry", async function () {
         await contract
@@ -112,6 +112,27 @@ describe("Buy Sell Subscription Logic", function () {
             const expiry = await contract.subscriptionBoughtDuration(thirdUser.address,otherUser.address);
             console.log(`Current Time : ${time}\nExpiry : ${expiry}`);
             await expect(tx).to.emit(contract,"SubscriptionBought").withArgs(thirdUser.address,otherUser.address,1,parseEther("20"),expiry);
+        });
+        it.only("Check All Values Updated Successfully",async function(){
+            let fee = await contract.feeCollected();
+            console.log(`Fee Collected : ${(formatEther(fee))}`);
+            let tx = await contract.connect(thirdUser).buyOrRenewSubscription(otherUser.address,1,{value:parseEther("20")});
+            await tx.wait();
+            let block = await ethers.provider.getBlock(tx.blockNumber);
+            const creator = await contract.creatorProfile(otherUser.address);
+            fee = await contract.feeCollected();
+            console.log(`Fee Collected : ${formatEther(fee)}`);
+            let amount = parseEther("20") - (fee);
+            console.log(`Amount : ${amount}`)
+            const expiry = await contract.subscriptionBoughtDuration(thirdUser.address,otherUser.address);
+            let activePlan = await contract.activePlan(thirdUser.address,otherUser.address);
+            console.log(`active Plan : ${activePlan}`)
+            expect(activePlan).to.equal(1n);
+            expect(fee).equals(parseEther("0.4"));
+            expect(BigInt(amount)).to.equal(creator.totalBalance);
+            expect(creator.totalSubscribers).equals(1n);
+            console.log(`Expiry : ${expiry}\nBlock Timestamp : ${block!.timestamp+20*86400}`)
+            expect(expiry).equals(BigInt(block!.timestamp+20*86400));
         })
     })
   });
