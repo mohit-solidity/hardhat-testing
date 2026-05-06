@@ -9,9 +9,13 @@ describe("Buy Sell Subscription Logic", function () {
   let otherUser: any;
   let thirdUser: any;
   let contract: any;
+  let nft : any;
   beforeEach(async function () {
     [owner, otherUser, , thirdUser] = await ethers.getSigners();
     contract = await ethers.deployContract("Subscription");
+    let nftAddress = await contract.subscriptionNFT();
+    const NFT = await ethers.getContractFactory("SubscriptionNFT");
+    nft = await NFT.attach(nftAddress);
     await contract.addCreator(otherUser.address);
     await contract.connect(otherUser).addPlan(1, parseEther("20"), 20);
   });
@@ -133,6 +137,20 @@ describe("Buy Sell Subscription Logic", function () {
             expect(creator.totalSubscribers).equals(1n);
             console.log(`Expiry : ${expiry}\nBlock Timestamp : ${block!.timestamp+20*86400}`)
             expect(expiry).equals(BigInt(block!.timestamp+20*86400));
+        })
+        it.only("Should Check NFT Has Minted When User Buy Subscription",async function(){
+            let tx = await contract.connect(thirdUser).buyOrRenewSubscription(otherUser.address,1,{value:parseEther("20")});
+            await tx.wait();
+            const block = await ethers.provider.getBlock(tx.blockNumber);
+            console.log(`Block Time : ${block!.timestamp+(20*86400)}`)
+            await expect(tx).to.emit(contract,"SubscriptionBought");
+            const isValid = await contract.isValidSubscription(thirdUser.address,otherUser.address);
+            console.log(`Is Valid : ${isValid?"Yes":"No"}`)
+            const subExpiry = await contract.subscriptionBoughtDuration(thirdUser.address,otherUser.address);
+            const expiry = await nft.getExpiry(thirdUser.address,otherUser.address);
+            console.log(`Expiry : ${expiry}`);
+            expect(isValid).to.equal(true);
+            expect(expiry).equals(subExpiry);
         })
 
     })

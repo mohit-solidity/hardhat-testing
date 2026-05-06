@@ -20,6 +20,9 @@ contract SubscriptionNFT is ERC721{
         require(msg.sender==owner,"Only Owner Can Mint NFT's");
         _;
     }
+    event NFTMinted(address indexed user,address indexed creator,uint time);
+
+    //Functions
     function mintOrRenewNFT(address user,address creator,uint expiry) external onlyOwner{
         uint token = userTokenData[user][creator];
         if(token!=0){
@@ -31,6 +34,7 @@ contract SubscriptionNFT is ERC721{
         _mint(user, tokenID);
         token = tokenID;
         subscriptionDetails[token] = NFT({creator:creator,user:user,expiry:expiry});
+        emit NFTMinted(user, creator, expiry);
     }
     function isValidSubscription(address user,address creator) external view returns(bool){
         uint token = userTokenData[user][creator];
