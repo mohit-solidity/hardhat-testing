@@ -148,10 +148,7 @@ contract Subscription is Ownable,ReentrancyGuard{
         if(!isCreator[_creator]) revert NotTheCreator();
         Creator storage c = creatorProfile[_creator];
         CreatorPlans memory p = creatorPlans[_creator][planId];
-        require(c.exists,"Creator Doesn't exists");
         require(p.isActive, "Plan Not Active or Not Found");
-        require(creatorPlans[_creator][planId].price != 0, "Plan not found");
-        require(creatorPlans[_creator][planId].price != 0, "Plan not found");
         require(p.price!=0,"Craetor hasn't Set Their Monthly Pay Yet");
         require(msg.value==p.price,"Make sure To Send Same Amount Of User");
         require(subscriptionBoughtDuration[msg.sender][_creator]<block.timestamp,"Subscription Still Active");
