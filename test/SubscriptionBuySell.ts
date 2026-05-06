@@ -113,7 +113,7 @@ describe("Buy Sell Subscription Logic", function () {
             console.log(`Current Time : ${time}\nExpiry : ${expiry}`);
             await expect(tx).to.emit(contract,"SubscriptionBought").withArgs(thirdUser.address,otherUser.address,1,parseEther("20"),expiry);
         });
-        it.only("Check All Values Updated Successfully",async function(){
+        it("Check All Values Updated Successfully",async function(){
             let fee = await contract.feeCollected();
             console.log(`Fee Collected : ${(formatEther(fee))}`);
             let tx = await contract.connect(thirdUser).buyOrRenewSubscription(otherUser.address,1,{value:parseEther("20")});
@@ -134,6 +134,7 @@ describe("Buy Sell Subscription Logic", function () {
             console.log(`Expiry : ${expiry}\nBlock Timestamp : ${block!.timestamp+20*86400}`)
             expect(expiry).equals(BigInt(block!.timestamp+20*86400));
         })
+
     })
   });
   describe("Gift Subscription", function () {});
