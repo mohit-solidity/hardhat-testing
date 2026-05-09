@@ -95,7 +95,7 @@ describe("Creator Profile Setup", function () {
     })
   })
   describe("Not Creator", function () {
-    it.only("Should Not Let Non-Creator Interact With Any Functions That Are Only For Creators",async function(){
+    it("Should Not Let Non-Creator Interact With Any Functions That Are Only For Creators",async function(){
         await expect(contract.connect(otherUser).setCreatorName("Pirate")).to.be.revertedWith("Not a creator");
         await expect(contract.connect(otherUser).addPlan(1,parseEther("30"),30)).to.be.revertedWith("Not a creator");
         await expect(contract.connect(otherUser).activatePlan(20)).to.be.revertedWith("Not a creator");

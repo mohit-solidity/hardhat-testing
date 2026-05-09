@@ -1,6 +1,7 @@
 import { expect } from "chai";
 import { formatEther, parseEther } from "ethers";
 import { network } from "hardhat";
+import { parse } from "path";
 
 const { ethers } = await network.create();
 
@@ -194,6 +195,17 @@ describe("Buy Sell Subscription Logic", function () {
         expect(isValid).to.equal(true);
         expect(expiry).equals(subExpiry);
       });
+      it.only("Should Add Deducted Fee To The Balance Of Contract",async function(){
+        await contract.connect(thirdUser).buyOrRenewSubscription(otherUser.address,1,{value:parseEther("20")});
+        const fee = (parseEther("20")*BigInt(200))/BigInt(10000);
+        const creator = await contract.creatorProfile(otherUser.address);
+        const feeCollected = await contract.feeCollected();
+        console.log(`Fee Calculated = ${fee}\nActual Fee Collected : ${feeCollected}`)
+        const remainingAmount = parseEther("20") - fee;
+        console.log(`Remaining Calculated Value : ${remainingAmount}\nActual Collected Amount : ${creator.totalBalance}`)
+        expect(fee).equals(feeCollected);
+        expect(remainingAmount).equals(creator.totalBalance);
+      })
     });
   });
   describe("Gift Subscription", function () {
