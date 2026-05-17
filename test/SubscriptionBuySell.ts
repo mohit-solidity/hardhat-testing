@@ -16,7 +16,7 @@ describe("Buy Sell Subscription Logic", function () {
     contract = await ethers.deployContract("Subscription");
     let nftAddress = await contract.subscriptionNFT();
     const NFT = await ethers.getContractFactory("SubscriptionNFT");
-    nft = await NFT.attach(nftAddress);
+    nft = NFT.attach(nftAddress);
     await contract.addCreator(otherUser.address);
     await contract.connect(otherUser).addPlan(1, parseEther("20"), 20);
   });
